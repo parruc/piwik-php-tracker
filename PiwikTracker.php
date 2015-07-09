@@ -630,7 +630,22 @@ class PiwikTracker
         }
 
         $postData = json_encode($data);
-        $response = $this->sendRequest($this->getBaseUrl(), 'POST', $postData, $force = true);
+        $success = false;
+        $count = 0;
+        while(!$success) {
+            try {
+                $response = $this->sendRequest($this->getBaseUrl(), 'POST', $postData, $force = true);
+                if ($response){
+                        $success = true;
+                }
+            }
+            catch(Exception $e){
+                sleep(3);
+                $count++;
+                error_log($url . " - " . $count);
+                // throw $e;
+            }
+        }
 
         $this->storedTrackingActions = array();
 
@@ -1384,7 +1399,22 @@ class PiwikTracker
                 $stream_options['http']['content'] = $data;
             }
             $ctx = stream_context_create($stream_options);
-            $response = file_get_contents($url, 0, $ctx);
+            $success = false;
+            $count = 0;
+            while(!$success) {
+                try {   
+                        $response = file_get_contents($url, 0, $ctx);
+                        if ($response){
+                            $success = true;
+                        }
+                }
+                catch(Exception $e){
+                    sleep(3);
+                    $count++;
+                    error_log($url . " - " . $count);
+                    //throw $e;
+                }
+            }
             $content = $response;
         }
         return $content;
